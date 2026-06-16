@@ -130,7 +130,7 @@ Sample output excerpt:
 3. Click "New app", select your fork, set the main file to `app.py`, and click "Deploy".
 4. In the app's Settings under "Secrets", add `GROQ_API_KEY = "gsk_your_key_here"`.
 
-The app is live within a minute at a `*.streamlit.app` URL.
+Live demo: coming soon
 
 ### Render (free tier)
 
