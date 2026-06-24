@@ -160,7 +160,7 @@ def get_llm(api_key: str, temp: float = 0) -> ChatGroq:
     if not api_key or not api_key.strip():
         raise ValueError("A valid Groq API key is required.")
     return ChatGroq(
-        model_name="llama3-8b-8192",
+        model_name="llama-3.1-8b-instant",
         temperature=temp,
         groq_api_key=api_key.strip(),
         max_tokens=1024,
