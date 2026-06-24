@@ -57,6 +57,7 @@ st.markdown("""
     display: flex;
     align-items: center;
     gap: 0.8rem;
+    color: #1a1a1a;
 }
 .doc-icon { font-size: 1.5rem; }
 .doc-info { flex: 1; }
@@ -95,6 +96,7 @@ st.markdown("""
     margin: 0.6rem 0;
     border-left: 4px solid #22c55e;
     line-height: 1.6;
+    color: #1a1a1a;
 }
 
 .answer-card {
@@ -105,6 +107,7 @@ st.markdown("""
     box-shadow: 0 4px 15px rgba(0,0,0,0.07);
     margin: 0.5rem 0;
     line-height: 1.7;
+    color: #1a1a1a;
 }
 
 .source-chip {
