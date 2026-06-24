@@ -8,8 +8,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -315,14 +315,12 @@ def cross_qa(vectorstore: FAISS, question: str, api_key: str) -> tuple:
     )
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     try:
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            retriever=vectorstore.as_retriever(search_kwargs={"k": 5}),
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": prompt},
-        )
-        result = qa.invoke({"query": question})
-        return result["result"], result["source_documents"]
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+        source_docs = retriever.invoke(question)
+        context = "\n\n".join(doc.page_content for doc in source_docs)
+        chain = prompt | llm | StrOutputParser()
+        answer = chain.invoke({"context": context, "question": question})
+        return answer, source_docs
     except Exception as e:
         logger.error("Q&A failed: %s", e)
         return f"Could not generate an answer: {e}", []
