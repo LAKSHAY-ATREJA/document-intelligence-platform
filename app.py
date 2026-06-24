@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 st.set_page_config(
     page_title="Document Intelligence Platform",
-    page_icon="🧠",
+    page_icon="D",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -329,33 +329,36 @@ def cross_qa(vectorstore: FAISS, question: str, api_key: str) -> tuple:
 # ── Hero ──────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
-    <h1>🧠 Document Intelligence Platform</h1>
+    <h1>Document Intelligence Platform</h1>
     <p>Upload multiple documents — extract entities, generate summaries, compare insights, and ask questions across your entire library</p>
     <div>
-        <span class="feature-badge">📋 Auto Summarisation</span>
-        <span class="feature-badge">🏷️ Entity Extraction</span>
-        <span class="feature-badge">🔄 Cross-Doc Comparison</span>
-        <span class="feature-badge">💬 Unified Q&A</span>
-        <span class="feature-badge">🔍 Source Attribution</span>
+        <span class="feature-badge">Auto Summarisation</span>
+        <span class="feature-badge">Entity Extraction</span>
+        <span class="feature-badge">Cross-Doc Comparison</span>
+        <span class="feature-badge">Unified Q&A</span>
+        <span class="feature-badge">Source Attribution</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ── Sidebar ───────────────────────────────────────────────────
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("Configuration")
     # Allow the API key to be pre-loaded from the environment (useful for deployments)
     default_key = os.environ.get("GROQ_API_KEY", "")
-    api_key = st.text_input(
-        "Groq API Key",
-        value=default_key,
-        type="password",
-        placeholder="gsk_...",
-        help="Free key at console.groq.com",
-    )
+    if default_key:
+        api_key = default_key
+        st.success("API key configured")
+    else:
+        api_key = st.text_input(
+            "Groq API Key",
+            type="password",
+            placeholder="gsk_...",
+            help="Free key at console.groq.com",
+        )
 
     st.divider()
-    st.header("📁 Upload Documents")
+    st.header("Upload Documents")
     uploaded_files = st.file_uploader(
         "Upload PDFs",
         type=["pdf"],
@@ -387,7 +390,7 @@ with st.sidebar:
                     try:
                         st.session_state.vectorstore = rebuild_vectorstore(st.session_state.documents)
                         progress.empty()
-                        st.success(f"✅ {len(new_files)} document(s) ready!")
+                        st.success(f"{len(new_files)} document(s) ready!")
                     except Exception as e:
                         progress.empty()
                         st.error(f"Failed to build search index: {e}")
@@ -396,12 +399,11 @@ with st.sidebar:
 
     if st.session_state.documents:
         st.divider()
-        st.header("📚 Document Library")
+        st.header("Document Library")
         for fname, data in st.session_state.documents.items():
             display_name = fname[:30] + ("..." if len(fname) > 30 else "")
             st.markdown(
                 f'<div class="doc-card">'
-                f'<div class="doc-icon">📄</div>'
                 f'<div class="doc-info">'
                 f'<div class="doc-name">{display_name}</div>'
                 f'<div class="doc-meta">{data["pages"]} pages · Added {data["added"]}</div>'
@@ -410,7 +412,7 @@ with st.sidebar:
             )
 
         st.divider()
-        if st.button("🗑️ Clear All", use_container_width=True):
+        if st.button("Clear All", use_container_width=True):
             st.session_state.documents = {}
             st.session_state.vectorstore = None
             st.session_state.summaries = {}
@@ -422,7 +424,7 @@ with st.sidebar:
 # ── Guard: require API key ────────────────────────────────────
 if not api_key:
     st.info(
-        "👈 Enter your Groq API key in the sidebar to get started. "
+        "Enter your Groq API key in the sidebar to get started. "
         "Free keys are available at [console.groq.com](https://console.groq.com)."
     )
     st.stop()
@@ -431,7 +433,7 @@ if not api_key:
 if not st.session_state.documents:
     st.markdown("""
 <div class="empty-state">
-    <div class="icon">📄</div>
+    <div class="icon">PDF</div>
     <h3>No documents uploaded yet</h3>
     <p>Upload one or more PDFs in the sidebar to begin</p>
 </div>""", unsafe_allow_html=True)
@@ -456,13 +458,13 @@ for col, val, lbl in [
 st.divider()
 
 tab1, tab2, tab3, tab4 = st.tabs(
-    ["📋 Summaries", "🏷️ Entity Extraction", "🔄 Cross-Doc Analysis", "💬 Q&A"]
+    ["Summaries", "Entity Extraction", "Cross-Doc Analysis", "Q&A"]
 )
 
 # ── Tab 1: Summaries ──────────────────────────────────────────
 with tab1:
     st.subheader("AI-Generated Document Summaries")
-    if st.button("📋 Generate All Summaries", type="primary"):
+    if st.button("Generate All Summaries", type="primary"):
         for fname, data in st.session_state.documents.items():
             if fname not in st.session_state.summaries:
                 with st.spinner(f"Summarising {fname}..."):
@@ -470,7 +472,7 @@ with tab1:
     if st.session_state.summaries:
         for fname, summary in st.session_state.summaries.items():
             st.markdown(
-                f'<div class="insight-card"><strong>📄 {fname}</strong><br><br>{summary}</div>',
+                f'<div class="insight-card"><strong>{fname}</strong><br><br>{summary}</div>',
                 unsafe_allow_html=True,
             )
     else:
@@ -479,21 +481,21 @@ with tab1:
 # ── Tab 2: Entity Extraction ──────────────────────────────────
 with tab2:
     st.subheader("Automated Entity Extraction")
-    if st.button("🏷️ Extract Entities from All Documents", type="primary"):
+    if st.button("Extract Entities from All Documents", type="primary"):
         for fname, data in st.session_state.documents.items():
             if fname not in st.session_state.entities:
                 with st.spinner(f"Extracting from {fname}..."):
                     st.session_state.entities[fname] = extract_entities(data["text"], api_key)
     if st.session_state.entities:
         entity_labels = [
-            ("🏢 Orgs", "organisations", "chip-org"),
-            ("📅 Dates", "dates", "chip-date"),
-            ("💰 Money", "monetary_values", "chip-money"),
-            ("📌 Topics", "key_topics", "chip-topic"),
-            ("📍 Locations", "locations", "chip-loc"),
+            ("Orgs", "organisations", "chip-org"),
+            ("Dates", "dates", "chip-date"),
+            ("Money", "monetary_values", "chip-money"),
+            ("Topics", "key_topics", "chip-topic"),
+            ("Locations", "locations", "chip-loc"),
         ]
         for fname, ents in st.session_state.entities.items():
-            st.markdown(f"**📄 {fname}**")
+            st.markdown(f"**{fname}**")
             cols = st.columns(5)
             for col, (label, key, cls) in zip(cols, entity_labels):
                 with col:
@@ -515,9 +517,9 @@ with tab2:
 with tab3:
     st.subheader("Cross-Document Comparison & Analysis")
     if len(st.session_state.documents) < 2:
-        st.info("📌 Upload at least 2 documents to compare them.")
+        st.info("Upload at least 2 documents to compare them.")
     else:
-        if st.button("🔄 Compare All Documents", type="primary"):
+        if st.button("Compare All Documents", type="primary"):
             # Ensure summaries exist for all documents before comparing
             missing = [
                 fname for fname in st.session_state.documents
@@ -537,7 +539,7 @@ with tab3:
                 unsafe_allow_html=True,
             )
             st.download_button(
-                "💾 Download Analysis",
+                "Download Analysis",
                 st.session_state.comparison,
                 file_name="comparison_analysis.md",
                 mime="text/markdown",
@@ -547,7 +549,7 @@ with tab3:
 with tab4:
     st.subheader("Ask Questions Across All Documents")
     st.caption(
-        f"🔍 Searching across {len(st.session_state.documents)} document(s) "
+        f"Searching across {len(st.session_state.documents)} document(s) "
         "simultaneously with source attribution"
     )
 
@@ -561,7 +563,7 @@ with tab4:
                     {s.metadata.get("source_file", "Unknown") for s in qa["sources"]}
                 )
                 chips = " ".join(
-                    [f'<span class="source-chip">📄 {s}</span>' for s in source_files]
+                    [f'<span class="source-chip">{s}</span>' for s in source_files]
                 )
                 st.markdown(f"**Sources:** {chips}", unsafe_allow_html=True)
 
@@ -577,7 +579,7 @@ with tab4:
                 {s.metadata.get("source_file", "Unknown") for s in sources}
             )
             chips = " ".join(
-                [f'<span class="source-chip">📄 {s}</span>' for s in source_files]
+                [f'<span class="source-chip">{s}</span>' for s in source_files]
             )
             st.markdown(f"**Sources:** {chips}", unsafe_allow_html=True)
         st.session_state.qa_history.append(
