@@ -172,3 +172,4 @@ The parser works on text-based PDFs where text is stored as selectable character
 ---
 
 Built by Lakshay Atreja — https://github.com/LAKSHAY-ATREJA
+
